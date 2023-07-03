@@ -1,8 +1,11 @@
 COP3530 Project 3 README
 
 Team Members:
+
   Austin Rhee
+  
   Serafina Myers
+  
   Jonathan Kennel
 
 
@@ -12,21 +15,26 @@ The aim of this project will be to provide game publishers or developers with in
 References:
 
   SteamSpy API (Unofficial)
+  
     https://steamspy.com/api.php
   
   Official Steam Web API
+  
     https://steamcommunity.com/dev 
   
   Documentation regarding Steam Web API
+  
     https://wiki.teamfortress.com/wiki/User:RJackson/StorefrontAPI 
     https://partner.steamgames.com/doc/webapi_overview 
     https://steamapi.xpaw.me/ 
   
   Former project regarding Steam data 
+  
     https://nik-davis.github.io/posts/2019/steam-data-collection/
 
 
   Useful Data Points:
+  
     Genre - Use as a primary delimiter to allow users to compare games in similar genres (FPS vs FPS instead of indie game vs strategy game).
     Score_rank - User reviews aggregated into a game score.
     Owners - Roughly correlated with purchases, can be swayed by price, giveaways & discount frequency.
