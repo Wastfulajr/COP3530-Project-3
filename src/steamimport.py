@@ -1,8 +1,6 @@
 import csv
 import json
 import time
-import datetime
-import statistics
 import os
 
 import requests as rq  # Used to interface with Steam API HTTP/S requests
@@ -18,7 +16,7 @@ def def_params():
 def json_req(url=None, params=None):
     """Given a url, return the JSON response."""
     if url is None:
-        print("Error: no URL.\n")
+        print("Error: no URL.")
         return
     try:
         jsonReq = rq.get(url=url, params=params)  # Send a GET request to the Steam APi
@@ -33,28 +31,42 @@ def json_req(url=None, params=None):
 def dataRequest(page="0"):
     """Given a page, call json_req to return that page. Default page = 0"""
     params = def_params()
-    params["pages"] = page
-    data = json_req(urlbase(), def_params())
+    params["page"] = str(page)
+    data = json_req(urlbase(), params)
     return data
 
 def printData(data):
     """Given a dict, read out data"""
+    """Primarily a test function"""
     for key in data:
-        print("Key: ", key)
         for info in data[key]:
             print(info, ": ", data[key][info])
         print("\n")
 
 def saveData(data):
     """Given a dict of data, save to a csv file"""
-    with open('test/steamspy.csv', 'w', encoding="utf-8", newline='') as f:
-        data_fields = ['appid', 'name', 'developer', 'publisher', 
-                       'score_rank', 'positive', 'negative', 'userscore',
-                       'owners', 'average_forever', 'average_2weeks',
-                       'median_forever', 'median_2weeks', 'price',
-                       'initialprice', 'discount', 'ccu']
-        wr = csv.DictWriter(f, fieldnames=data_fields)
-        wr.writeheader()
-        for key in data:
-            wr.writerow(data[key])
+    dataExists = os.path.isfile('test/steamspy.csv')
+    data_fields = ['appid', 'name', 'developer', 'publisher', 
+                        'score_rank', 'positive', 'negative', 'userscore',
+                        'owners', 'average_forever', 'average_2weeks',
+                        'median_forever', 'median_2weeks', 'price',
+                        'initialprice', 'discount', 'ccu']
+    try:
+        if not dataExists:  # Case where CSV does not exist, write header & enter 'write' mode
+            print("Creating new file steamspy.csv")
+            with open('test/steamspy.csv', 'w', encoding="utf-8", newline='') as f:
+                wr = csv.DictWriter(f, fieldnames=data_fields)  # Pass dict() to writehead
+                wr.writeheader()  # Pass all data_fields as header
+                for key in data:
+                    wr.writerow(data[key])
+                print("Write complete!")
+        else:  # Case where CSV does exist, do not write header & enter 'append' mode
+            print("Appending to file steamspy.csv")
+            with open('test/steamspy.csv', 'a', encoding="utf-8", newline='') as f:
+                wr = csv.DictWriter(f, fieldnames=data_fields)  # Pass dict() to writehead
+                for key in data:
+                    wr.writerow(data[key])
+                print("Write complete!")
+    except Exception as e:
+        print("Writing failed! Exception: ", e)
 
