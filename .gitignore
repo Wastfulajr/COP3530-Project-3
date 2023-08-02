@@ -1,5 +1,3 @@
 test/**
-data
 main.py
 src/__pychache__
-src/__init__.py
