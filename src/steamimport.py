@@ -70,4 +70,3 @@ def saveData(data):
                 print("Write complete!")
     except Exception as e:
         print("Writing failed! Exception: ", e)
-
