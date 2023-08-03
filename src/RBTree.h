@@ -36,6 +36,7 @@ public:
     RBNode* returnRoot();
     RBTree() : root(nullptr) {}
     void insert(int key, gameObject game);
+    RBNode* search(int val);
     void debugInsert(int key);
     void inorderTraversal(RBNode* node);
 };

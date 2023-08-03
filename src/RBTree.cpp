@@ -123,8 +123,8 @@ void RBTree::insert(int val, gameObject game) {
     }
 }
 
-// used after insert to correct the tree
 // TRUE IS BLACK ---- FALSE IS RED
+// used after insert to correct the tree
 void RBTree::correctTree(RBNode* node) {
     if (node == root) { // if inserted node was the root node
         node->color = true; // node color = black
@@ -164,6 +164,24 @@ void RBTree::correctTree(RBNode* node) {
             grandparent->color = false;
         }
     }
+}
+
+RBNode* RBTree::search(int val) {
+    RBNode* current = root; // start from root
+
+    while (current != nullptr) {
+        if (val == current->key) {
+            return current;
+        }
+        else if (val < current->key) {
+            current = current->left;
+        }
+        else {
+            current = current->right;
+        }
+    }
+
+    return nullptr; // should be the same whether its return current or return nullptr
 }
 
 // inorderTraversal(rbTree.returnRoot())
