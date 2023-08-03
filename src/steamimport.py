@@ -22,22 +22,23 @@ def json_req(url=None, params=None):
     try:
         jsonReq = rq.get(url=url, params=params)  # Send a GET request to the Steam APi
     except Exception as e:
-        print("Excpetion on page ", params["page"], " during GET Request:\n", e)  # Prints err if rq.get() fails
-        print("\nRe-trying request in 5 seconds.")
+        print("Excpetion during GET Request:", e)  # Prints err if rq.get() fails
+        print("Re-trying request in 5 seconds.")
         time.sleep(5)
         return json_req(url, params)  # Recurse, and attempt to re-make request
     if jsonReq:  # If the request is successful, get the response json
         return jsonReq.json()
 
-def dataRequest(page="0"):
-    """Given a page, call json_req to return that page. Default page = 0"""
-    params = def_params()
-    params["page"] = str(page)
-    data = json_req(urlbase(), params)
+def dataRequest(url=urlbase(), params=def_params()):
+    """Given a page, call json_req to return that page.
+       Default parameters defined by def_params()
+       Default url defined by urlbase()"""
+    data = json_req(url, params)
     if not data:
-       print("Failed to obtain page", page, " retrying in 15 seconds")
+       print("Failed to process json request for", url)
+       print("Retrying in 15 seconds")
        time.sleep(15)
-       return dataRequest(page)  # Recurse, and attempt to re-make request
+       return dataRequest(params)  # Recurse, and attempt to re-make request
     return data
 
 def printData(data):
