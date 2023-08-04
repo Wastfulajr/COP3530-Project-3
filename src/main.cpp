@@ -79,7 +79,7 @@ void ReadFileHashMap(const char* filename, HashMap &map) {
         while (getline(file, lineFromFile)) {
             if (!lineFromFile.empty()) {
                 gameObject obj = CreateObj(lineFromFile);
-                map.emplace(obj._appid, obj);
+                map.insert(obj._appid, obj);
             }
         }
     }

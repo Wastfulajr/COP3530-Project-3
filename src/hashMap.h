@@ -5,14 +5,14 @@
 #ifndef COP3530_PROJECT_3_HASHMAP_H
 #define COP3530_PROJECT_3_HASHMAP_H
 #include <unordered_map>
+#include <vector>
 using namespace std;
 #include "gameObject.h"
 
 struct HashNode {
 
     vector<pair<int, gameObject>> _bucket;
-    void put(int key, gameObject game);
-    ~HashNode();
+    void put(int key, const gameObject& game);
 
 };
 
@@ -24,14 +24,15 @@ private:
     int _capacity;
     //vector<HashNode*> *_hashVec = new vector<HashNode*>;
     HashNode **_hashArr;
-
-    HashMap(int capacity, double maxLF = 0.5);
-    ~HashMap();
-    int hashFunc(int key);
+    int hashFunc(int key) const;
     void reHash();
 
+
 public:
-    void insert(int key, gameObject game);
+    int getCapacity();
+    ~HashMap();
+    HashMap(int capacity, double maxLF = 0.5);
+    void insert(int key, gameObject &game);
     bool at(const int key, gameObject &value) ;
 
 };
