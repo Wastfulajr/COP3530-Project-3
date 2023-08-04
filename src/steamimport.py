@@ -6,9 +6,13 @@ import os
 
 import requests as rq  # Used to interface with Steam API HTTP/S requests
 
-def urlbase():
-    """Base API url for Steamspy"""
+def urlbaseSpy():
+    """Base API url for SteamSpy"""
     return "https://steamspy.com/api.php"
+
+def urlbaseSteam():
+    """Base API url for Steam Store"""
+    return "https://store.steampowered.com/api/appdetails"
 
 def def_params():
     """Params for SteamSpy API call"""
@@ -37,9 +41,9 @@ def json_req(url=None, params=None):
     if jsonReq:  # If the request is successful, get the response json
         return jsonReq.json()
 
-def dataRequest(url=urlbase(), params=def_params()):
-    """Given a page, call json_req to return that page.
-       Default url defined by urlbase().
+def dataRequest(url=urlbaseSpy(), params=def_params()):
+    """Given a url and params, call json_req to return that url's data.
+       Default url defined by urlbaseSpy().
        Default parameters defined by def_params()."""
     data = json_req(url, params)
     if not data:
@@ -53,9 +57,43 @@ def printData(data):
     """Given a dict, read out data"""
     """Primarily a test function"""
     for key in data:
-        for info in data[key]:
-            print(info, ": ", data[key][info])
-        print("\n")
+        print(key, ": ", data[key], sep="")
+
+def cleanSteamData(data):
+    """Given a data dict of Steam data, reformat for .csv writing"""
+    data_clean = {}
+    for applist in data:  # Only executes ONCE
+        for app in data[applist]:  # Only executes ONCE
+            for game in data[applist][app]:  # Iterates over every game entry
+                data_clean[game['appid']] = game
+    print("Cleaned Steam Data.")
+    return data_clean
+
+def cleanAppData(data):
+    """Given a data dict of an app, reformat for .csv writing"""
+    req_keys = ['type', 'name', 'steam_appid', 'metacritic', 'genres', 'recommendations', 'developers']
+    data_clean = {}
+    for appID in data:  # Executes only ONCE
+        info = data[appID]['data']
+        for key in info:
+            if key not in req_keys:
+                continue
+            if key == req_keys[3]:  # Metacritic
+                data_clean[key] = info[key]['score']
+                continue
+            if key == req_keys[4]:  # Genres
+                data_clean[key] = info[key][0]['description']
+                continue
+            if key == req_keys[5]:  # Recommendations
+                data_clean[key] = info[key]['total']
+                continue
+            if key == req_keys[6]:  # Developers (Take only top)
+                data_clean[key] = info[key][0]
+                continue
+            else:
+                data_clean[key] = info[key]
+    return data_clean
+
 
 def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBase()):
     """Given a dict of data, save to a csv file.
@@ -83,11 +121,11 @@ def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBase()):
     except Exception as e:
         print("Writing failed! Exception:", e)
 
-def cleanSteamData(data):
-    data_clean = {}
-    for applist in data:  # Only iterates ONCE
-        for app in data[applist]:  # Only iterates ONCE
-            for game in data[applist][app]:
-                data_clean[game['appid']] = game
-    print("Cleaned Steam Data.")
-    return data_clean
+def getAppInfo(appID, name):
+    """Query Steam API for detailed App Information.
+       Accepts appID and name as arguments.
+    """
+    data = dataRequest(urlbaseSteam(), {'appids': appID, 'l': 'english'})
+    if not data:  # If dev has hidden information, return only appid and name
+        return {'appid': appID, 'name': name}
+    return data
