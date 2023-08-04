@@ -18,13 +18,19 @@ def def_params():
     """Params for SteamSpy API call"""
     return {"request": "all", "page": "0"}
 
-def fieldsBase():
+def fieldsBaseSpy():
     """Headers for SteamSpy data"""
     data_fields = ['appid', 'name', 'developer', 'publisher', 
                     'score_rank', 'positive', 'negative', 'userscore',
                     'owners', 'average_forever', 'average_2weeks',
                     'median_forever', 'median_2weeks', 'price',
                     'initialprice', 'discount', 'ccu']
+    return data_fields
+
+def fieldsBaseSteam():
+    """Headers for Steam App Data"""
+    data_fields = ['steam_appid', 'type', 'name', 'genres', 'metacritic', 'price', 'recommendations', 'developers']
+    return data_fields
 
 def json_req(url=None, params=None):
     """Given a url, return the JSON response."""
@@ -69,7 +75,7 @@ def cleanSteamData(data):
     print("Cleaned Steam Data.")
     return data_clean
 
-def cleanAppData(data):
+def cleanAppDetails(data):
     """Given a data dict of an app, reformat for .csv writing"""
     req_keys = ['type', 'name', 'steam_appid', 'metacritic', 'genres', 'recommendations', 'developers']
     data_clean = {}
@@ -102,21 +108,22 @@ def cleanAppPrice(data):
             data_clean[appID] = '0' 
             return data_clean
         if data[appID]['data']:
-            data_clean[appID] = data[appID]['data']['price_overview']['initial']
+            data_clean['price'] = data[appID]['data']['price_overview']['initial']
         else:
-            data_clean[appID] = '0'
+            data_clean['price'] = '0'
     return data_clean
 
-def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBase()):
+def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBaseSpy()):
     """Given a dict of data, save to a csv file.
        Takes path, file, datafields as args.
        path: data/
        file: steamspy.csv
-       data_fields: fieldsBase()"""
+       data_fields: fieldsBaseSpy()"""
     dataExists = os.path.isfile(path)
     try:
         if not dataExists:  # Case where CSV does not exist, write header & enter 'write' mode
             print("Creating new file", file)
+            print("data type", type(data) )
             with open(path + file, 'w', encoding="utf-8", newline='') as f:
                 wr = csv.DictWriter(f, fieldnames=data_fields)  # Pass dict() to writehead
                 wr.writeheader()  # Pass all data_fields as header
@@ -133,13 +140,13 @@ def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBase()):
     except Exception as e:
         print("Writing failed! Exception:", e)
 
-def getAppInfo(appID, name):
-    """Query Steam API for detailed App Information.
-       Accepts appID and name as arguments.
+def getAppDetails(appID):
+    """Query Steam API for App Details (not incl price)
+       Accepts appID its arg.
     """
     data = dataRequest(urlbaseSteam(), {'appids': appID, 'l': 'english'})
     if not data:  # If dev has hidden information, return only appid and name
-        return {'appid': appID, 'name': name}
+        return {'appid': appID}
     return data
 
 def getAppPrice(appID):
@@ -150,3 +157,13 @@ def getAppPrice(appID):
     if not data:  # If error, raise.
         print('Error getting', appID)
     return data
+
+def getAppInfo(appID):
+    """Calls getAppPrice and getAppDetails for data streams,
+       then calls cleanAppPrice and cleanAppDetails to format
+       for proper writing to .csv files
+       Returns a data dict object"""
+    appDetails = cleanAppDetails(getAppDetails(appID))
+    appPrice = cleanAppPrice(getAppPrice(appID))
+    merge_data ={'': appDetails | appPrice }
+    return merge_data
