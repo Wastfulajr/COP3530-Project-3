@@ -26,15 +26,32 @@ HashMap::HashMap(int capacity, double maxLF) {
 void HashMap::reHash() {
     int oldCap = _capacity;
     _capacity = _capacity * 2 + 1;
-    HashNode** newHashMap = new HashNode*[_capacity];
+    HashNode **newHashMap = new HashNode *[_capacity];
     for (int i = 0; i < _capacity; i++) {
         newHashMap[i] = nullptr;
     }
 
     for (int i = 0; i < oldCap; i++) {
-        HashNode* node = _hashArr[i];
-
+        HashNode *oldNode = _hashArr[i];
+        while (oldNode != nullptr) {
+            for(int j = 0; j < oldNode->_bucket.size(); j++) {
+                pair<int, gameObject> myPair = (oldNode->_bucket.at(j));
+                HashNode *node = new HashNode;
+                newHashMap[hashFunc(myPair.first)] = node; // because _capacity is changed, so is the hashfunction
+                node->put(myPair.first, myPair.second);
+            }
+        }
     }
+
+    for (int i = 0; i < oldCap; i++) {
+        HashNode *oldNode = _hashArr[i];
+        while (oldNode != nullptr) {
+            delete oldNode;
+        }
+    }
+
+    delete [] _hashArr;
+    _hashArr = newHashMap;
 }
 
 int HashMap::hashFunc(int key) {
@@ -44,14 +61,15 @@ int HashMap::hashFunc(int key) {
 void HashMap::insert(int key, gameObject game) {
     int hashCode = hashFunc(key);
     if (hashCode > _capacity - 1) {
-        // rehash and attempt another insert
+        reHash();
+        insert(key, gameObject);
     }
     else {
         _hashArr[hashCode]->put(key, game);
         _numElements++;
     }
     if ((double)_numElements/(double)_capacity > _maxLF) {
-        // rehash
+        reHash();
     }
 
 }
@@ -64,16 +82,16 @@ bool HashMap::at(const int key, gameObject &value) {
     HashNode node = *_hashArr[hashCode];
     for (int i = 0; i < node._bucket.size(); i++) {
         if (node._bucket.at(i).first == key) {
-            value = node._bucket.at(i).second;
-            return true;
-        }
+        value = node._bucket.at(i).second;
+        return true;
     }
-    return false;
+}
+return false;
 }
 
 HashMap::~HashMap() {
     for (int i = 0 ; i < _capacity; i++) {
         delete _hashArr[i];
     }
-    delete _hashArr;
+    delete [] _hashArr;
 }
