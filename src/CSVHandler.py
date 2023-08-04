@@ -30,3 +30,8 @@ def grabIndex(file, path='data/'):
     except FileNotFoundError:  # If indexer not found, create it and return index = 0
         createIndexer(file, path)
         return 0
+    
+def updateIndex(index, file, path='data/'):
+    """Given index, and indexer file and path, update index."""
+    with open(path + file, 'w', encoding='utf-8', newline='') as f:
+        print(index, file=f)
