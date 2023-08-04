@@ -80,6 +80,8 @@ def cleanAppDetails(data):
     req_keys = ['type', 'name', 'steam_appid', 'metacritic', 'genres', 'recommendations', 'developers']
     data_clean = {}
     for appID in data:  # Executes only ONCE
+        if data[appID]['success'] == False:
+            return data
         info = data[appID]['data']
         for key in info:
             if key not in req_keys:
@@ -119,11 +121,10 @@ def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBaseSpy(
        path: data/
        file: steamspy.csv
        data_fields: fieldsBaseSpy()"""
-    dataExists = os.path.isfile(path)
+    dataExists = os.path.isfile(path + file)
     try:
         if not dataExists:  # Case where CSV does not exist, write header & enter 'write' mode
             print("Creating new file", file)
-            print("data type", type(data) )
             with open(path + file, 'w', encoding="utf-8", newline='') as f:
                 wr = csv.DictWriter(f, fieldnames=data_fields)  # Pass dict() to writehead
                 wr.writeheader()  # Pass all data_fields as header
