@@ -10,21 +10,29 @@ using namespace std;
 
 struct HashNode {
 
-    int _key;
-    gameObject _game;
-
-    HashNode(int key, gameObject game);
+    vector<pair<int, gameObject>> _bucket;
+    void put(int key, gameObject game);
+    ~HashNode();
 
 };
 
 class HashMap {
 
 private:
-    gameObject* _mapArray = new gameObject[150000];
+    int _numElements;
+    double _maxLF;
+    int _capacity;
+    //vector<HashNode*> *_hashVec = new vector<HashNode*>;
+    HashNode **_hashArr;
+
+    HashMap(int capacity, double maxLF = 0.5);
     ~HashMap();
+    int hashFunc(int key);
+    void reHash();
+
 public:
-    void emplace(int key, gameObject game);
-    gameObject& at(int key);
+    void insert(int key, gameObject game);
+    bool at(const int key, gameObject &value) ;
 
 };
 
