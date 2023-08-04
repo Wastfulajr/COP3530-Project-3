@@ -94,6 +94,15 @@ def cleanAppData(data):
                 data_clean[key] = info[key]
     return data_clean
 
+def cleanAppPrice(data):
+    """Given a data dict of app pricing, reformat for .csv writing"""
+    data_clean = {}
+    for appID in data:  # Executes ONCE
+        if data[appID]['success'] == False:
+            data_clean[appID] = '0' 
+            return data_clean
+        data_clean[appID] = data[appID]['data']['price_overview']['initial']
+    return data_clean
 
 def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBase()):
     """Given a dict of data, save to a csv file.
@@ -128,4 +137,13 @@ def getAppInfo(appID, name):
     data = dataRequest(urlbaseSteam(), {'appids': appID, 'l': 'english'})
     if not data:  # If dev has hidden information, return only appid and name
         return {'appid': appID, 'name': name}
+    return data
+
+def getAppPrice(appID):
+    """Query Steam Storefront API for detailed App Pricing.
+       Accepts appID as its only arg.
+       Returns both a data stream."""
+    data = dataRequest(urlbaseSteam(), {'filters': 'price_overview', 'appids': appID, 'l': 'english'})
+    if not data:  # If dev has hidden information, return 0.
+        return {'initial': '0'}
     return data
