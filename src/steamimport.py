@@ -22,18 +22,23 @@ def json_req(url=None, params=None):
     try:
         jsonReq = rq.get(url=url, params=params)  # Send a GET request to the Steam APi
     except Exception as e:
-        print("Excpetion on page ", params["page"], " during GET Request:\n", e)  # Prints err if rq.get() fails
-        print("\nRe-trying request in 5 seconds.")
+        print("Excpetion during GET Request:", e)  # Prints err if rq.get() fails
+        print("Re-trying request in 5 seconds.")
         time.sleep(5)
         return json_req(url, params)  # Recurse, and attempt to re-make request
     if jsonReq:  # If the request is successful, get the response json
         return jsonReq.json()
 
-def dataRequest(page="0"):
-    """Given a page, call json_req to return that page. Default page = 0"""
-    params = def_params()
-    params["page"] = str(page)
-    data = json_req(urlbase(), params)
+def dataRequest(url=urlbase(), params=def_params()):
+    """Given a page, call json_req to return that page.
+       Default parameters defined by def_params()
+       Default url defined by urlbase()"""
+    data = json_req(url, params)
+    if not data:
+       print("Failed to process json request for", url)
+       print("Retrying in 15 seconds")
+       time.sleep(15)
+       return dataRequest(params)  # Recurse, and attempt to re-make request
     return data
 
 def printData(data):
@@ -44,18 +49,19 @@ def printData(data):
             print(info, ": ", data[key][info])
         print("\n")
 
-def saveData(data):
-    """Given a dict of data, save to a csv file"""
-    dataExists = os.path.isfile('test/steamspy.csv')
+def saveData(data, path='data/steamspy.csv'):
+    """Given a dict of data, save to a csv file.
+    Takes a path as an argument, default data/steamspy.csv"""
+    dataExists = os.path.isfile(path)
     data_fields = ['appid', 'name', 'developer', 'publisher', 
-                        'score_rank', 'positive', 'negative', 'userscore',
-                        'owners', 'average_forever', 'average_2weeks',
-                        'median_forever', 'median_2weeks', 'price',
-                        'initialprice', 'discount', 'ccu']
+                    'score_rank', 'positive', 'negative', 'userscore',
+                    'owners', 'average_forever', 'average_2weeks',
+                    'median_forever', 'median_2weeks', 'price',
+                    'initialprice', 'discount', 'ccu']
     try:
         if not dataExists:  # Case where CSV does not exist, write header & enter 'write' mode
             print("Creating new file steamspy.csv")
-            with open('test/steamspy.csv', 'w', encoding="utf-8", newline='') as f:
+            with open(path, 'w', encoding="utf-8", newline='') as f:
                 wr = csv.DictWriter(f, fieldnames=data_fields)  # Pass dict() to writehead
                 wr.writeheader()  # Pass all data_fields as header
                 for key in data:
@@ -63,7 +69,7 @@ def saveData(data):
                 print("Write complete!")
         else:  # Case where CSV does exist, do not write header & enter 'append' mode
             print("Appending to file steamspy.csv")
-            with open('test/steamspy.csv', 'a', encoding="utf-8", newline='') as f:
+            with open(path, 'a', encoding="utf-8", newline='') as f:
                 wr = csv.DictWriter(f, fieldnames=data_fields)  # Pass dict() to writehead
                 for key in data:
                     wr.writerow(data[key])
