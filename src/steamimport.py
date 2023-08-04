@@ -101,7 +101,10 @@ def cleanAppPrice(data):
         if data[appID]['success'] == False:
             data_clean[appID] = '0' 
             return data_clean
-        data_clean[appID] = data[appID]['data']['price_overview']['initial']
+        if data[appID]['data']:
+            data_clean[appID] = data[appID]['data']['price_overview']['initial']
+        else:
+            data_clean[appID] = '0'
     return data_clean
 
 def saveData(data, path='data/', file='steamspy.csv', data_fields=fieldsBase()):
@@ -144,6 +147,6 @@ def getAppPrice(appID):
        Accepts appID as its only arg.
        Returns both a data stream."""
     data = dataRequest(urlbaseSteam(), {'filters': 'price_overview', 'appids': appID, 'l': 'english'})
-    if not data:  # If dev has hidden information, return 0.
-        return {'initial': '0'}
+    if not data:  # If error, raise.
+        print('Error getting', appID)
     return data
