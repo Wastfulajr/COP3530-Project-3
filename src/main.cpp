@@ -31,11 +31,12 @@ double correctTokenDouble(string uncheckedToken);
 int main() {
 
     const char* file = "data/steamspy.csv";
-    const char* file2 = "merge2_v2_no_commas.csv";
+    const char* file2 = "data/final_data.csv";
     set<string> genres;
     map<int, string> genresMap;
 
-
+    string dataChoice;
+    int dataChoiceInt; // 1 is red-black tree; 2 is hash map
     string userInput;
     int choice;
     string targetGenre;
@@ -90,6 +91,25 @@ int main() {
 
         printDecendingOrderHM(targetGenre, myHashMap);
 
+        cout << endl;
+        bool decidingData = true;
+        while (decidingData) {
+            cout << "If you would like to retrieve the data using a red-black tree, type 1. If you would like to retrieve the data using a hash map, type 2" << endl;
+            cin >> dataChoice;
+            while (!checkInteger(dataChoice)) {
+                cout << "Input was not an integer, please try again." << endl;
+                cin >> dataChoice;
+            }
+            dataChoiceInt = stoi(dataChoice);
+            if (dataChoiceInt != 1 && dataChoiceInt != 2) { // if input is integer but not correct.
+                cout << R"(Please enter either '1' or '2')" << endl;
+            }
+            else {
+                decidingData = false;
+            }
+
+        }
+
         gameObject blanky;
         bool contGettingIDs = true;
         while (contGettingIDs) {
@@ -108,14 +128,28 @@ int main() {
             else if (choice < -1) {
                 cout << "This AppID does not exist. Try again." << endl;
             }
-            else if (!myHashMap.at(choice, blanky)) {
-                cout << "No game was found with that AppID. Try again." << endl;
+            else if (dataChoiceInt == 2) { // If retrieving through hash map
+                if (!myHashMap.at(choice, blanky)) {
+                    cout << "No game was found with that AppID. Try again." << endl;
+                }
+                else {
+                    myHashMap.at(choice, blanky);
+                    blanky.PrintStats();
+                    cout << endl;
+                }
             }
-            else {
-                myHashMap.at(choice, blanky);
-                blanky.PrintStats();
-                cout << endl;
+            else { // if retrieving through red-black tree
+                if (!myRBTree.search(choice)) {
+                    cout << "No game was found with that AppID. Try again." << endl;
+                }
+                else {
+                    auto tempRB = myRBTree.search(choice);
+                    blanky = tempRB->game;
+                    blanky.PrintStats();
+                    cout << endl;
+                }
             }
+
 
         }
     }
