@@ -21,14 +21,13 @@ gameObject::gameObject() {
     _developer = "default dev";
     _positive = -1;
     _negative = -1;
-    _userscore = -1;
-    _owners = -1;
+    _owners = "default owners";
     _price = -1.00;
     _ccu = -1;
     _success = -1.0;
 }
 
-gameObject::gameObject(int appid, string name, string type, string genres, int metacritic, int recommendations, string developers, int positive, int negative, int userscore, int owners, double price, int ccu) {
+gameObject::gameObject(int appid, string name, string type, string genres, int metacritic, int recommendations, string developers, int positive, int negative, string owners, double price, int ccu) {
     _appid = appid;
     _name = name;
     _type = type;
@@ -38,11 +37,14 @@ gameObject::gameObject(int appid, string name, string type, string genres, int m
     _developer = developers;
     _positive = positive;
     _negative = negative;
-    _userscore = userscore;
     _owners = owners;
     _price = price;
     _ccu = ccu;
-    _success = (double)(_positive)/(double)(_positive/(_negative+_positive));
+    if ((_negative + _positive) == 0) {
+        _success = 0.0;
+    }
+    else {_success = (double)(_positive)/(double)(_negative + _positive);}
+
 }
 
 
@@ -54,20 +56,24 @@ void gameObject::PrintStats() {
     cout << "    Price: " << "$" << _price << endl;
     cout << "    Developer: " << _developer << endl;
     cout << "    Metacritic Score: " << _metacritic << endl;
+    cout << "    Number of Owners: " << _owners << endl;
     cout << "    Number of Positive Reviews: " << _positive << endl;
     cout << "    Number of Negative Reviews: " << _negative << endl;
     cout << "    Total Reviews: " << _negative + _positive << endl;
     cout << "    Number of Recommendations: " << _recommendations << endl;
+    cout << "    Concurrent Users (8/4/23): " << _ccu << endl;
+    cout << "    Calculated Success Index: " << _success << endl;
+
 
 }
 
 void gameObject::PrintStatsClean() {
-    cout << setw(10) << "AppID: " << _appid << " | " << setw(60) << _name << " | " << setw(25) << _metacritic << endl;
+    cout << _appid << setw(10) << " | " << setw(80) << _name << " | " << setw(13) << _success << " | " << endl;
 }
 
 bool operator<(const gameObject& lhs, const gameObject& rhs) {
-    return (lhs._metacritic < rhs._metacritic);
+    return (lhs._success < rhs._success);
 }
 bool operator>(const gameObject& lhs, const gameObject& rhs) {
-    return (lhs._metacritic > rhs._metacritic);
+    return (lhs._success > rhs._success);
 }

@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <vector>
 #include <set>
@@ -23,12 +24,14 @@ bool checkInteger(string str);
 bool foundKey(int key, map<int,string> map);
 vector<gameObject>& sortVecMetacritic(vector<gameObject> &vec);
 bool comparator(const gameObject& lhs, const gameObject& rhs);
-
+int correctTokenInt(string uncheckedToken);
+string correctTokenString(string uncheckedToken);
+double correctTokenDouble(string uncheckedToken);
 
 int main() {
 
     const char* file = "data/steamspy.csv";
-    const char* file2 = "test.csv";
+    const char* file2 = "merge2_v2_no_commas.csv";
     set<string> genres;
     map<int, string> genresMap;
 
@@ -37,46 +40,85 @@ int main() {
     int choice;
     string targetGenre;
 
+    cout << "Welcome to the Steampunks' Trend Analyzer!" << endl;
+    cout << "Please wait while we load the data into RBTree and a HashMap..." << endl;
+
     HashMap myHashMap;
     ReadFileHashMap(file2, myHashMap, genres);
     RBTree myRBTree;
     ReadFileRBTree(file2, myRBTree, genres);
+    bool weContinue = true;
+    while (weContinue) {
+        cout << endl << "Type one of the following numbers to browse the games from that genre. Type -1 to exit the program." << endl << endl;
 
-    cout << "Welcome to the Steampunks' Trend Analyzer!" << endl;
-    cout << "Please type one of the following numbers to browse the games from that genre." << endl << endl;
+        int counter = 1;
+        for (auto iter = genres.begin(); iter != genres.end(); iter++) {
+            cout << "    " << counter << ". " << *iter << endl;
+            genresMap.emplace(counter, *iter);
+            counter++;
+        }
 
-    int counter = 1;
-    for (auto iter = genres.begin(); iter != genres.end(); iter++) {
-        cout << "    " << counter << ". " << *iter << endl;
-        genresMap.emplace(counter, *iter);
-        counter++;
-    }
-
-    cout << endl;
-    bool inputBad = true;
-    while (inputBad) {
-        cin >> userInput;
-        while (!checkInteger(userInput)) {
-            cout << "Input was not an integer, please try again." << endl;
+        cout << endl;
+        bool inputBad = true;
+        while (inputBad) {
             cin >> userInput;
-        }
+            while (!checkInteger(userInput)) {
+                cout << "Input was not an integer, please try again." << endl;
+                cin >> userInput;
+            }
 
-        choice = stoi(userInput);
+            choice = stoi(userInput);
 
-        if (!foundKey(choice, genresMap)) {
-            cout << "The integer you entered was not available in the list. Try again." << endl;
-        }
-        else {
-            inputBad = false;
-        }
+            if (choice == -1) {
+                weContinue = false;
+                cout << endl;
+                cout << "Thank you for using the Steampunks' Trend Analyzer!" << endl;
+            }
+            else if (!foundKey(choice, genresMap)) {
+                cout << "The integer you entered was not available in the list. Try again." << endl;
+            }
+            else {
+                inputBad = false;
+            }
 
+        }
+        targetGenre = genresMap.at(choice);
+        cout << "Success index: # of positive reviews / # of all reviews." << endl;
+        cout << "Games in the " << targetGenre << " genre sorted by success index: " << endl;
+
+        cout << "AppID " << setw(10) << " | "  << "Name" << setw(79) << "| " << setw(10) << "Success Index" << " | " << endl;
+
+        printDecendingOrderHM(targetGenre, myHashMap);
+
+        gameObject blanky;
+        bool contGettingIDs = true;
+        while (contGettingIDs) {
+            cout << "Type the AppID of the game you would like to view full info for. Type -1 if you want to go back to the list of genres." << endl;
+            cin >> userInput;
+            while (!checkInteger(userInput)) {
+                cout << "Input was not an integer, please try again." << endl;
+                cin >> userInput;
+            }
+
+            choice = stoi(userInput);
+
+            if (choice == -1) {
+                contGettingIDs = false;
+            }
+            else if (choice < -1) {
+                cout << "This AppID does not exist. Try again." << endl;
+            }
+            else if (!myHashMap.at(choice, blanky)) {
+                cout << "No game was found with that AppID. Try again." << endl;
+            }
+            else {
+                myHashMap.at(choice, blanky);
+                blanky.PrintStats();
+                cout << endl;
+            }
+
+        }
     }
-    targetGenre = genresMap.at(choice);
-    cout << "Success index: # of positive reviews / # of all reviews" << endl;
-    cout << "Games in the " << targetGenre << " genre sorted by success index: " << endl;
-
-    printDecendingOrderHM(targetGenre, myHashMap);
-
     return 0;
 }
 
@@ -85,7 +127,7 @@ void printDecendingOrderHM(string targetGenre, HashMap &map) {
     for (int i = 0; i < map.getCapacity(); i++) {
         if (map._hashArr[i] != nullptr) {
             for (int j = 0; j < map._hashArr[i]->_bucket.size(); j++) {
-                if (map._hashArr[i]->_bucket.at(j).second._genre == targetGenre ) {
+                if (map._hashArr[i]->_bucket.at(j).second._genre == targetGenre) {
                     sortVec.emplace_back(map._hashArr[i]->_bucket.at(j).second);
                 }
             }
@@ -123,17 +165,43 @@ bool checkInteger(string str) {
     return true;
 }
 
-gameObject CreateObj(string &lineFromFile) {
+int correctTokenInt(string uncheckedToken) {
+    if (uncheckedToken == "") {
+        return 0;
+    }
+    else {
+        return stoi(uncheckedToken);
+    }
+}
 
-    int metacritic;
-    int recommendations;
+double correctTokenDouble(string uncheckedToken) {
+    if (uncheckedToken == "") {
+        return 0.0;
+    }
+    else {
+        return stod(uncheckedToken);
+    }
+}
+
+string correctTokenString(string uncheckedToken) {
+    if (uncheckedToken == "") {
+        return "None";
+    }
+    else {
+        return uncheckedToken;
+    }
+}
+
+gameObject CreateObj(string &lineFromFile) {
 
     istringstream stream(lineFromFile);
     string token;
+
     getline(stream, token, ',');
+
     int appid = stoi(token);
-    getline(stream, token, ',');
-    string type = token;
+
+
     getline(stream, token, ',');
     if (token[0] == '\"') {
         string fullname = "";
@@ -146,27 +214,75 @@ gameObject CreateObj(string &lineFromFile) {
         fullname.append(token.substr(0,token.size() - 1));
         token = fullname;
     }
+
     string name = token;
+
     getline(stream, token, ',');
-    string genre = token;
+
+    string type = correctTokenString(token);
+
     getline(stream, token, ',');
-    if (token != "") {
-        metacritic = stoi(token);
+
+    string genres = correctTokenString(token);
+
+    getline(stream, token, ',');
+
+    int metacritic = correctTokenInt(token);
+
+    getline(stream, token, ',');
+
+    int recommendations = correctTokenInt(token);
+
+    getline(stream, token, ',');
+    if (token[0] == '\"') {
+        string fulldev = "";
+        token = token.substr(1);
+        while (token[token.size() - 1] != '\"') {
+            fulldev.append(token);
+            fulldev.append(",");
+            getline(stream, token, ',');
+        }
+        fulldev.append(token.substr(0,token.size() - 1));
+        token = fulldev;
     }
-    else {metacritic = 0;}
+
+    string developers = token;
+
     getline(stream, token, ',');
-    double price = stod(token)/100.00;
+
+    int positive = correctTokenInt(token);
+
     getline(stream, token, ',');
-    if (token != "") {
-        recommendations = stoi(token);
+
+    int negative = correctTokenInt(token);
+
+    getline(stream, token, ',');
+    if (token[0] == '\"') {
+        string fullowners = "";
+        token = token.substr(1);
+        while (token[token.size() - 1] != '\"') {
+            fullowners.append(token);
+            fullowners.append(",");
+            getline(stream, token, ',');
+        }
+        fullowners.append(token.substr(0,token.size() - 1));
+        token = fullowners;
     }
-    else {recommendations = 0;}
+
+    string owners = token;
+
     getline(stream, token, ',');
-    string dev = token;
+
+    double price = correctTokenDouble(token);
+
+    getline(stream, token, ',');
+
+    int ccu = correctTokenInt(token);
 
 
-    gameObject game(appid, type, name, genre, metacritic, price, recommendations, dev);
-    return game;
+    gameObject* game = new gameObject(appid,name,type,genres,metacritic,recommendations,developers,positive,negative,owners,price,ccu);
+
+    return *game;
 }
 
 void ReadFileHashMap(const char* filename, HashMap &map, set<string> &genre) {
