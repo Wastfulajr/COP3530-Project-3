@@ -120,7 +120,13 @@ bool HashMap::at(const int key, gameObject &value) {
     if (hashCode > _capacity - 1) {
         return false;
     }
-    HashNode node = *_hashArr[hashCode];
+    HashNode node;
+    if (_hashArr[hashCode] != nullptr) {
+        node = *_hashArr[hashCode];
+    }
+    else {
+        return false;
+    }
     for (int i = 0; i < node._bucket.size(); i++) {
         if (node._bucket.at(i).first == key) {
             value = node._bucket.at(i).second;
