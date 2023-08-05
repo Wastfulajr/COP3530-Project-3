@@ -170,7 +170,7 @@ def getAppPrice(appID):
     return data
 
 def getAppInfo(appID):
-    """Calls getAppPrice and getAppDetails for data streams,
+    """Calls getAppPrice and getAppDetails   for data streams,
        then calls cleanAppPrice and cleanAppDetails to format
        for proper writing to .csv files
        Returns a data dict object"""
