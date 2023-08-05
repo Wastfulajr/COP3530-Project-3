@@ -19,16 +19,16 @@ struct HashNode {
 class HashMap {
 
 private:
-    int _numElements;
-    double _maxLF;
-    int _capacity;
     //vector<HashNode*> *_hashVec = new vector<HashNode*>;
-    HashNode **_hashArr;
     [[nodiscard]] int hashFunc(int key) const;
     void reHash();
 
 
 public:
+    HashNode **_hashArr;
+    int _numElements;
+    double _maxLF;
+    int _capacity;
     int getCapacity() const;
     ~HashMap();
     explicit HashMap(int capacity = 20, double maxLF = 0.5);

@@ -7,23 +7,31 @@
 #include <utility>
 #include <string>
 
-
 using namespace std;
 
 struct gameObject {
 
     int _appid;
-    string _type;
     string _name;
+    string _type;
     string _genre;
     int _metacritic;
-    double _price;
     int _recommendations;
     string _developer;
+    int _positive;
+    int _negative;
+    int _userscore;
+    int _owners;
+    double _price;
+    int _ccu;
+    double _success;
 
     gameObject();
-    gameObject(int appid, string type, string name, string genre, int metacritic, double price, int recommendations, string developer);
+    gameObject(int appid, string name, string type, string genres, int metacritic, int recommendations, string developers, int positive, int negative, int userscore, int owners, double price, int ccu);
     void PrintStats();
+    void PrintStatsClean();
+    friend bool operator<(const gameObject& lhs, const gameObject& rhs);
+    friend bool operator>(const gameObject& lhs, const gameObject& rhs);
 };
 
 

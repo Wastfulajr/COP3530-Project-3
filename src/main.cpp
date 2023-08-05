@@ -8,6 +8,7 @@
 #include <set>
 #include <fstream>
 #include <map>
+#include <algorithm>
 #include "gameObject.h"
 #include "hashMap.h"
 #include "RBTree.h"
@@ -18,9 +19,10 @@ void ReadFileHashMap(const char* filename, HashMap &map, set<string> &genre);
 void ReadFileRBTree(const char* filename, RBTree &map, set<string> &genre);
 gameObject CreateObj(string &lineFromFile);
 void printDecendingOrderHM(string targetGenre, HashMap &map);
-void printDecendingOrderRB(string targetGenre, HashMap &map);
 bool checkInteger(string str);
 bool foundKey(int key, map<int,string> map);
+vector<gameObject>& sortVecMetacritic(vector<gameObject> &vec);
+bool comparator(const gameObject& lhs, const gameObject& rhs);
 
 
 int main() {
@@ -70,11 +72,31 @@ int main() {
 
     }
     targetGenre = genresMap.at(choice);
-    cout << "Games in the " << targetGenre << " genre sorted by metacritic score: " << endl;
+    cout << "Success index: # of positive reviews / # of all reviews" << endl;
+    cout << "Games in the " << targetGenre << " genre sorted by success index: " << endl;
 
-
+    printDecendingOrderHM(targetGenre, myHashMap);
 
     return 0;
+}
+
+void printDecendingOrderHM(string targetGenre, HashMap &map) {
+    vector<gameObject> sortVec;
+    for (int i = 0; i < map.getCapacity(); i++) {
+        if (map._hashArr[i] != nullptr) {
+            for (int j = 0; j < map._hashArr[i]->_bucket.size(); j++) {
+                if (map._hashArr[i]->_bucket.at(j).second._genre == targetGenre ) {
+                    sortVec.emplace_back(map._hashArr[i]->_bucket.at(j).second);
+                }
+            }
+        }
+    }
+
+    sort(sortVec.begin(), sortVec.end(), greater<gameObject>());
+
+    for (int i = 0; i < sortVec.size(); i++) {
+        sortVec.at(i).PrintStatsClean();
+    }
 }
 
 bool foundKey(int key, map<int, string> m) {
@@ -184,13 +206,4 @@ void ReadFileRBTree(const char* filename, RBTree &map, set<string> &genre) {
             }
         }
     }
-}
-
-void printDecendingOrderHM(HashMap &map) {
-    vector<gameObject> sortVec;
-
-}
-
-void printDecendingOrderRB(HashMap &map) {
-    vector<gameObject> sortVec;
 }
