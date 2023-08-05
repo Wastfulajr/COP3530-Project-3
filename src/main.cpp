@@ -7,6 +7,7 @@
 #include <vector>
 #include <set>
 #include <fstream>
+#include <map>
 #include "gameObject.h"
 #include "hashMap.h"
 #include "RBTree.h"
@@ -16,17 +17,23 @@ using namespace std;
 void ReadFileHashMap(const char* filename, HashMap &map, set<string> &genre);
 void ReadFileRBTree(const char* filename, RBTree &map, set<string> &genre);
 gameObject CreateObj(string &lineFromFile);
-void printDecendingOrderHM(HashMap &map);
-void printDecendingOrderRB(HashMap &map);
+void printDecendingOrderHM(string targetGenre, HashMap &map);
+void printDecendingOrderRB(string targetGenre, HashMap &map);
+bool checkInteger(string str);
+bool foundKey(int key, map<int,string> map);
 
 
 int main() {
 
     const char* file = "data/steamspy.csv";
-    const char* file2 = "data/test.csv";
+    const char* file2 = "test.csv";
     set<string> genres;
+    map<int, string> genresMap;
+
 
     string userInput;
+    int choice;
+    string targetGenre;
 
     HashMap myHashMap;
     ReadFileHashMap(file2, myHashMap, genres);
@@ -39,12 +46,59 @@ int main() {
     int counter = 1;
     for (auto iter = genres.begin(); iter != genres.end(); iter++) {
         cout << "    " << counter << ". " << *iter << endl;
+        genresMap.emplace(counter, *iter);
         counter++;
     }
+
     cout << endl;
-    cin >> userInput;
+    bool inputBad = true;
+    while (inputBad) {
+        cin >> userInput;
+        while (!checkInteger(userInput)) {
+            cout << "Input was not an integer, please try again." << endl;
+            cin >> userInput;
+        }
+
+        choice = stoi(userInput);
+
+        if (!foundKey(choice, genresMap)) {
+            cout << "The integer you entered was not available in the list. Try again." << endl;
+        }
+        else {
+            inputBad = false;
+        }
+
+    }
+    targetGenre = genresMap.at(choice);
+    cout << "Games in the " << targetGenre << " genre sorted by metacritic score: " << endl;
+
+
 
     return 0;
+}
+
+bool foundKey(int key, map<int, string> m) {
+    if (m.find(key) == m.end()) {
+        return false;
+    }
+    return true;
+}
+
+bool checkInteger(string str) {
+    bool isNeg = false;
+    if (str == "") {
+        return false;
+    }
+    if (str[0] == '-') {
+        str = str.substr(1,str.size()-1);
+        isNeg = true;
+    }
+    for (int i = 0; i < str.size(); i++) {
+        if (!isdigit(str[i])) {
+            return false;
+        }
+    }
+    return true;
 }
 
 gameObject CreateObj(string &lineFromFile) {
@@ -138,5 +192,5 @@ void printDecendingOrderHM(HashMap &map) {
 }
 
 void printDecendingOrderRB(HashMap &map) {
-
+    vector<gameObject> sortVec;
 }
