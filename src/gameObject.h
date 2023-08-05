@@ -20,14 +20,13 @@ struct gameObject {
     string _developer;
     int _positive;
     int _negative;
-    int _userscore;
-    int _owners;
+    string _owners;
     double _price;
     int _ccu;
     double _success;
 
     gameObject();
-    gameObject(int appid, string name, string type, string genres, int metacritic, int recommendations, string developers, int positive, int negative, int userscore, int owners, double price, int ccu);
+    gameObject(int appid, string name, string type, string genres, int metacritic, int recommendations, string developers, int positive, int negative, string owners, double price, int ccu);
     void PrintStats();
     void PrintStatsClean();
     friend bool operator<(const gameObject& lhs, const gameObject& rhs);
