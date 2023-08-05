@@ -1,3 +1,4 @@
+"""Created by Austin Rhee 8/3/2023"""
 import time
 
 from src import steamimport as stim
@@ -14,7 +15,9 @@ def GetAppLists():
 
     while True:
         try:
-            groupSize = int(input('Number of games to process: '))
+           # groupSize = int(input('Number of games to process: '))
+           # Used if user Defined sizes are required
+           groupSize = 500
         except ValueError:
             print('Please input an integer.')
         else:
@@ -24,15 +27,19 @@ def GetAppLists():
     st = time.time()
     while (index < end - 1) and (index - stIndex < groupSize):
         appInfo = stim.getAppInfo(appIDs[index])
+        if appInfo == False:
+            print('JSON failure at', index)
+            print('Stopping requests...')
+            break
         stim.saveData(appInfo, 'data/', 'compAppInfo.csv', stim.fieldsBaseSteam())
         index += 1
-        time.sleep(0.75)
+        csvh.updateIndex(index, 'indexer.csv')
         if index % 10 == 0 and index != 0:
             en = time.time()
             print('Jobs', index - 10, 'to', index, 'completed.')
             print('Took', round(en - st, 2), 'seconds')
             st = time.time()
-
+    print(index - stIndex, 'completed. Stopping...')
     csvh.updateIndex(index, 'indexer.csv')
 
 if __name__ == '__main__':

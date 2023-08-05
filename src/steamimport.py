@@ -32,7 +32,7 @@ def fieldsBaseSteam():
     data_fields = ['steam_appid', 'type', 'name', 'genres', 'metacritic', 'price', 'recommendations', 'developers']
     return data_fields
 
-def json_req(url=None, params=None):
+def json_req(url=None, params=None, tries=0):
     """Given a url, return the JSON response."""
     if url is None:
         print("Error: no URL.")
@@ -41,22 +41,30 @@ def json_req(url=None, params=None):
         jsonReq = rq.get(url=url, params=params)  # Send a GET request to the Steam APi
     except Exception as e:
         print("Excpetion during GET Request:", e)  # Prints err if rq.get() fails
-        print("Re-trying request in 5 seconds.")
-        time.sleep(5)
-        return json_req(url, params)  # Recurse, and attempt to re-make request
+        if tries == 1:
+            print("Failed GET Request 1 time. Ending GET.")
+            return False
+        print("Re-trying request in 2 seconds.")
+        time.sleep(2)
+        return json_req(url, params, tries + 1)  # Recurse, and attempt to re-make request
     if jsonReq:  # If the request is successful, get the response json
         return jsonReq.json()
 
-def dataRequest(url=urlbaseSpy(), params=def_params()):
+def dataRequest(url=urlbaseSpy(), params=def_params(), tries=0):
     """Given a url and params, call json_req to return that url's data.
        Default url defined by urlbaseSpy().
        Default parameters defined by def_params()."""
     data = json_req(url, params)
+    if data == False:
+        return False
     if not data:
+       if tries == 1:
+           print('Failed to process json request 1 time. Ending request.')
+           return False
        print("Failed to process json request for", url)
-       print("Retrying in 15 seconds")
-       time.sleep(15)
-       return dataRequest(params)  # Recurse, and attempt to re-make request
+       print("Retrying in 2 seconds")
+       time.sleep(2)
+       return dataRequest(url, params, tries + 1)  # Recurse, and attempt to re-make request
     return data
 
 def printData(data):
@@ -105,6 +113,8 @@ def cleanAppDetails(data):
 def cleanAppPrice(data):
     """Given a data dict of app pricing, reformat for .csv writing"""
     data_clean = {}
+    if data == False:
+        return data_clean
     for appID in data:  # Executes ONCE
         if data[appID]['success'] == False:
             data_clean[appID] = '0' 
