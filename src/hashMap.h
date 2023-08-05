@@ -19,21 +19,23 @@ struct HashNode {
 class HashMap {
 
 private:
-    int _numElements;
-    double _maxLF;
-    int _capacity;
     //vector<HashNode*> *_hashVec = new vector<HashNode*>;
-    HashNode **_hashArr;
-    int hashFunc(int key) const;
+    [[nodiscard]] int hashFunc(int key) const;
     void reHash();
 
 
 public:
-    int getCapacity();
+    HashNode **_hashArr;
+    int _numElements;
+    double _maxLF;
+    int _capacity;
+    int getCapacity() const;
     ~HashMap();
-    HashMap(int capacity, double maxLF = 0.5);
+    explicit HashMap(int capacity = 20, double maxLF = 0.5);
     void insert(int key, gameObject &game);
-    bool at(const int key, gameObject &value) ;
+    bool at(int key, gameObject &value) ;
+    void PrintAll();
+    int getNumElements() const;
 
 };
 

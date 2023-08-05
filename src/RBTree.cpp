@@ -90,7 +90,7 @@ RBNode* RBTree::findUncle(RBNode* node) {
 
 // TRUE IS BLACK ---- FALSE IS RED
 // responsible for insertion, calls upon correctTree which is responsible for correcting (rotation and color wise) the tree
-void RBTree::insert(int val, gameObject game) {
+void RBTree::insert(int val, gameObject& game) {
     RBNode* newNode = new RBNode(val, game);
     if (root == nullptr) { // if inserting root
         root = newNode;
