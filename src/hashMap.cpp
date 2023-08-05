@@ -19,14 +19,13 @@ HashMap::HashMap(int capacity, double maxLF) {
     }
 }
 
-int HashMap::getCapacity() {
+int HashMap::getCapacity() const {
     return _capacity;
 }
 
 void HashMap::reHash() {
     int oldCap = _capacity;
     _capacity = _capacity * 2 + 1;
-    cout << "old capacity: " << oldCap << "; new capacity: " << _capacity << endl;
     HashNode **newHashMap = new HashNode *[_capacity];
 
     for (int i = 0; i < _capacity; i++) {
@@ -43,11 +42,20 @@ void HashMap::reHash() {
         }
 
         for(int j = 0; j < oldNode->_bucket.size(); j++) {
+            if (oldNode->_bucket.at(j).first == 247890) {
+            }
 
             pair<int, gameObject> myPair = (oldNode->_bucket.at(j));
-            HashNode *node = new HashNode;
-            newHashMap[hashFunc(myPair.first)] = node; // because _capacity is changed, so is the hashfunction
-            node->put(myPair.first, myPair.second);
+            if (newHashMap[hashFunc(myPair.first)] == nullptr) {
+                HashNode *node = new HashNode;
+                newHashMap[hashFunc(myPair.first)] = node; // because _capacity is changed, so is the hashfunction
+                node->put(myPair.first, myPair.second);
+            }
+            else {
+                auto node = newHashMap[hashFunc(myPair.first)];
+                node->put(myPair.first, myPair.second);
+            }
+
         }
 
     }
@@ -66,6 +74,7 @@ void HashMap::reHash() {
 }
 
 int HashMap::hashFunc(int key) const {
+
     return key % _capacity; // basically just reduce
 }
 
@@ -80,6 +89,7 @@ void HashMap::insert(int key, gameObject &game) {
     }
 
     else {
+
         // check if node at hashCode already exists
         HashNode* oldNode = _hashArr[hashCode];
         if (oldNode == nullptr) { // if it doesnt set it to a new node
@@ -125,4 +135,18 @@ HashMap::~HashMap() {
         delete _hashArr[i];
     }
     delete [] _hashArr;
+}
+
+void HashMap::PrintAll() {
+    for (int i = 0 ; i < _capacity; i++) {
+        if (_hashArr[i] != nullptr) {
+            for (int j = 0; j < _hashArr[i]->_bucket.size(); j++) {
+                _hashArr[i]->_bucket.at(j).second.PrintStats();
+            }
+        }
+    }
+}
+
+int HashMap::getNumElements() const {
+    return _numElements;
 }

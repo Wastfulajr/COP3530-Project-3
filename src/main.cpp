@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <set>
 #include <fstream>
 #include "gameObject.h"
 #include "hashMap.h"
@@ -12,82 +13,115 @@
 
 using namespace std;
 
-void ReadFileHashMap(const char* filename, HashMap &map);
-void ReadFileRBTree(const char* filename, RBTree &map);
+void ReadFileHashMap(const char* filename, HashMap &map, set<string> &genre);
+void ReadFileRBTree(const char* filename, RBTree &map, set<string> &genre);
 gameObject CreateObj(string &lineFromFile);
+void printDecendingOrderHM(HashMap &map);
+void printDecendingOrderRB(HashMap &map);
 
 
 int main() {
 
     const char* file = "data/steamspy.csv";
-    vector<string> genres;
+    const char* file2 = "data/test.csv";
+    set<string> genres;
+
+    string userInput;
+
+    HashMap myHashMap;
+    ReadFileHashMap(file2, myHashMap, genres);
+    RBTree myRBTree;
+    ReadFileRBTree(file2, myRBTree, genres);
+
+    cout << "Welcome to the Steampunks' Trend Analyzer!" << endl;
+    cout << "Please type one of the following numbers to browse the games from that genre." << endl << endl;
+
+    int counter = 1;
+    for (auto iter = genres.begin(); iter != genres.end(); iter++) {
+        cout << "    " << counter << ". " << *iter << endl;
+        counter++;
+    }
+    cout << endl;
+    cin >> userInput;
 
     return 0;
 }
 
 gameObject CreateObj(string &lineFromFile) {
-    istringstream stream(lineFromFile);
 
+    int metacritic;
+    int recommendations;
+
+    istringstream stream(lineFromFile);
     string token;
     getline(stream, token, ',');
     int appid = stoi(token);
     getline(stream, token, ',');
+    string type = token;
+    getline(stream, token, ',');
+    if (token[0] == '\"') {
+        string fullname = "";
+        token = token.substr(1);
+        while (token[token.size() - 1] != '\"') {
+            fullname.append(token);
+            fullname.append(",");
+            getline(stream, token, ',');
+        }
+        fullname.append(token.substr(0,token.size() - 1));
+        token = fullname;
+    }
     string name = token;
     getline(stream, token, ',');
-    string developer = token;
+    string genre = token;
     getline(stream, token, ',');
-    string publisher = token;
+    if (token != "") {
+        metacritic = stoi(token);
+    }
+    else {metacritic = 0;}
     getline(stream, token, ',');
-    string score_rank = token;
+    double price = stod(token)/100.00;
     getline(stream, token, ',');
-    int pos_reviews = stoi(token);
+    if (token != "") {
+        recommendations = stoi(token);
+    }
+    else {recommendations = 0;}
     getline(stream, token, ',');
-    int neg_reviews = stoi(token);
-    getline(stream, token, ',');
-    int userscore = stoi(token);
-    getline(stream, token, ',');
-    string owners = token; // problem... the owner has  commas in it so the delimiter is gonna get messed up
-    getline(stream, token, ',');
-    int average_forever = stoi(token);
-    getline(stream, token, ',');
-    int average_2weeks = stoi(token);
-    getline(stream, token, ',');
-    int median_forever = stoi(token);
-    getline(stream, token, ',');
-    int median_2weeks = stoi(token);
-    getline(stream, token, ',');
-    double price = stod(token);
-    getline(stream, token, ',');
-    double initialprice = stod(token);
-    getline(stream, token, ',');
-    double discount = stod(token);
-    getline(stream, token, ',');
-    int ccu = stoi(token);
+    string dev = token;
 
-    // todo: add genre when available!!
 
-    gameObject game(appid, name, developer, publisher, score_rank, pos_reviews, neg_reviews, userscore, owners, average_forever, average_2weeks, median_forever, median_2weeks, price, initialprice, discount, ccu);
+    gameObject game(appid, type, name, genre, metacritic, price, recommendations, dev);
     return game;
 }
 
-void ReadFileHashMap(const char* filename, HashMap &map) {
+void ReadFileHashMap(const char* filename, HashMap &map, set<string> &genre) {
     // Read the file, create and store some game objects
     string lineFromFile;
-    ifstream file(filename);
+    ifstream file;
+    file.open(filename);
     getline(file, lineFromFile); // get the template line out of the way
     if (file.is_open()) {
         while (getline(file, lineFromFile)) {
             if (!lineFromFile.empty()) {
                 gameObject obj = CreateObj(lineFromFile);
                 map.insert(obj._appid, obj);
+                genre.emplace(obj._genre);
             }
         }
     }
 }
-void ReadFileRBTree(const char* filename, RBTree &map) {
+
+void ReadFileRBTree(const char* filename, RBTree &map, set<string> &genre) {
     // Read the file, create and store some game objects
     string lineFromFile;
-    ifstream file(filename);
+    ifstream file;
+
+    if(file.is_open()) {
+        cout << "da file is open" << endl;
+    }
+    file.open(filename);
+
+    getline(file, lineFromFile); // get the template line out of the way
+
     if (file.is_open()) {
         while (getline(file, lineFromFile)) {
             if (!lineFromFile.empty()) {
@@ -98,3 +132,11 @@ void ReadFileRBTree(const char* filename, RBTree &map) {
     }
 }
 
+void printDecendingOrderHM(HashMap &map) {
+    vector<gameObject> sortVec;
+
+}
+
+void printDecendingOrderRB(HashMap &map) {
+
+}
