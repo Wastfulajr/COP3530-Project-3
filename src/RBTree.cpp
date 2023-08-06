@@ -197,38 +197,3 @@ RBNode *RBTree::returnRoot() {
     return this->root;
 }
 
-
-// Temporary include to avoid passing gameObjects while debugging
-// identical to insert except for gameObject part as is
-void RBTree::debugInsert(int val) {
-    RBNode* newNode = new RBNode(val);
-    if (root == nullptr) { // if inserting root
-        root = newNode;
-        root->color = true;
-    }
-    else {
-        RBNode* current = root;
-        RBNode* parent = nullptr;
-
-        // finding the correct open spot
-        while (current != nullptr) {
-            parent = current;
-            if (val < current->key) {
-                current = current->left;
-            }
-            else {
-                current = current->right;
-            }
-        }
-
-        newNode->parent = parent;
-        if (val < parent->key) {
-            parent->left = newNode;
-        }
-        else {
-            parent->right = newNode;
-        }
-
-        correctTree(newNode);
-    }
-}
