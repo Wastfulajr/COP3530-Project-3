@@ -31,7 +31,7 @@ double correctTokenDouble(string uncheckedToken);
 int main() {
 
     const char* file = "data/steamspy.csv";
-    const char* file2 = "data/final_data.csv";
+    const char* file2 = "final_data.csv";
     set<string> genres;
     map<int, string> genresMap;
 
@@ -94,7 +94,7 @@ int main() {
         cout << endl;
         bool decidingData = true;
         while (decidingData) {
-            cout << "If you would like to retrieve the data using a red-black tree, type 1. If you would like to retrieve the data using a hash map, type 2" << endl;
+            cout << "If you would like to retrieve the data using a red-black tree, type 1." << endl << "If you would like to retrieve the data using a hash map, type 2." << endl;
             cin >> dataChoice;
             while (!checkInteger(dataChoice)) {
                 cout << "Input was not an integer, please try again." << endl;
